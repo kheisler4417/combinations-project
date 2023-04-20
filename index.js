@@ -1,4 +1,5 @@
 const fs = require('fs');
+const calculatePrice = require('./calculatePrice');
 
 const widths = ['40', '50', '60', '65', '70', '80', '100', '120'];
 const lengths = [
@@ -181,3 +182,20 @@ fs.writeFile('combinations.txt', combinations.join('\n'), (err) => {
         console.log('Combinations saved to combinations.txt');
     }
 });
+
+const productCodes = [
+    '05-40X120RP-CFC',
+    '05-40X120RP-EFC',
+    '05-40X120RP-CFF',
+    // ... and so on, include the rest of your generated product codes
+];
+
+const prices = productCodes.map(productCode => {
+    const price = calculatePrice(productCode);
+    return {
+        productCode,
+        price: price === 'Invalid' ? 'Invalid' : `$${price.toFixed(2)}`,
+    };
+});
+
+console.log(prices);
