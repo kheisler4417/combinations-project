@@ -54,7 +54,7 @@ function calculatePrice(productCode) {
             break;
         case 80:
             pricePerFoot = 4.93;
-            fastenerPrice = fastener === 'RP' ? 3.00 : fastener === 'CS' ? 17.14 : 0;
+            fastenerPrice = fastener === 'RP' ? 3.00 : fastener === 'CS' ? 15.10 : 0;
             break;
         case 100:
             pricePerFoot = 6.11;

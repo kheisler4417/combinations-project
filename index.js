@@ -1,7 +1,9 @@
 const fs = require('fs');
 const calculatePrice = require('./calculatePrice');
+const getDescription = require('./descriptionGenerator');
 
-const widths = ['40', '50', '60', '65', '70', '80', '100', '120'];
+
+const widths = ['40', '50', '70', '80', '100', '120'];
 const lengths = [
     '120',
     '140',
@@ -168,8 +170,14 @@ widths.forEach(width => {
             fittings.forEach(fitting => {
                 const fastenerPart = fastener ? fastener : '';
                 const fittingPart = fitting ? '-' + fitting : '';
-                const combination = `05-${width}X${length}${fastenerPart}${fittingPart}`;
-                combinations.push(combination);
+
+                // Check if the combination is valid (must have a fastener and not width 120 with RP fastener)
+                const isValidCombination = fastener && (width !== '120' || fastener !== 'RP');
+
+                if (isValidCombination) {
+                    const combination = `05-${width}X${length}${fastenerPart}${fittingPart}`;
+                    combinations.push(combination);
+                }
             });
         });
     });
@@ -183,14 +191,7 @@ fs.writeFile('combinations.txt', combinations.join('\n'), (err) => {
     }
 });
 
-const productCodes = [
-    '05-40X120RP-CFC',
-    '05-40X120RP-EFC',
-    '05-40X120RP-CFF',
-    // ... and so on, include the rest of your generated product codes
-];
-
-const prices = productCodes.map(productCode => {
+const prices = combinations.map(productCode => {
     const price = calculatePrice(productCode);
     return {
         productCode,
@@ -198,4 +199,32 @@ const prices = productCodes.map(productCode => {
     };
 });
 
-console.log(prices);
+const productDescriptions = combinations.map(productCode => {
+    const price = calculatePrice(productCode);
+    const description = getDescription(productCode);
+    return {
+        productCode,
+        description,
+        price: price === 'Invalid' ? 'Invalid' : `$${price.toFixed(2)}`,
+    };
+});
+
+const outputLines = productDescriptions.map(
+    ({ productCode, description, price }) => `${productCode},"${description}",${price}`
+);
+
+fs.writeFile('descriptions_and_prices.txt', outputLines.join('\n'), (err) => {
+    if (err) {
+        console.error('Error writing to file:', err);
+    } else {
+        console.log('Descriptions and prices saved to descriptions_and_prices.txt');
+    }
+});
+
+fs.writeFile('descriptions_and_prices.csv', outputLines.join('\n'), (err) => {
+    if (err) {
+        console.error('Error writing to file:', err);
+    } else {
+        console.log('Descriptions and prices saved to descriptions_and_prices.csv');
+    }
+});
